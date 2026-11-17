@@ -278,6 +278,7 @@
         .dexi{width:26px;height:26px}
         .dex-tip{margin-top:4px;font-size:9px;font-weight:900;color:#d97706}
         .dex-note{margin-top:3px;font-size:9px;font-weight:700;color:#8a6a3a;line-height:1.3}
+        .golden-suit-active{box-shadow:0 0 0 4px #fbbf24,0 0 28px rgba(251,191,36,.65)!important}
     </style>
 <style>
 /* ===== 內建精簡版 Tailwind 工具類別（離線可用，取代 CDN）===== */
@@ -457,6 +458,7 @@ img,svg,canvas{display:block;max-width:100%}
         <button onclick="openCollectionModal()" class="absolute flex items-center justify-center gap-1.5 text-white font-black text-sm active:scale-95" style="left:57%;top:2.4%;width:28%;height:6%;background:#6b4430;border-radius:999px;box-shadow:0 3px 0 #3f2518,inset 0 2px 3px rgba(255,255,255,.25)"><span>💩</span><span id="home-dex-count">0/12</span></button>
         <button id="btn-sound" onclick="toggleSound()" class="absolute text-xl text-white font-black active:scale-95" style="left:86%;top:2.2%;width:11.5%;aspect-ratio:1;background:linear-gradient(#ffb340,#f58a07);border-radius:50%;box-shadow:0 3px 0 #b85d00">🔊</button>
         <div id="home-mascot-wrap" class="hidden"></div>
+        <div id="home-golden-badge" class="hidden absolute left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-black text-amber-900 shadow-md border-2 border-white whitespace-nowrap" style="top:61.5%;background:linear-gradient(180deg,#fde047,#f59e0b)">👑 黃金聖衣已覺醒（全配方 +5 分）</div>
         <div class="absolute text-center flex flex-col justify-center" style="left:24%;top:67%;width:62%;height:17%;background:linear-gradient(#f6e7bf,#ecd7a2);border-radius:10px 14px 10px 16px;transform:rotate(-1deg);box-shadow:0 4px 8px rgba(120,80,40,.3);border:2px solid #e2c98a">
             <div class="text-sm font-black text-stone-800 leading-tight">今日狀態：</div>
             <div id="buff-title" class="text-base font-black text-stone-800 leading-tight">載入中...</div>
@@ -473,6 +475,17 @@ img,svg,canvas{display:block;max-width:100%}
         <div class="absolute flex items-center justify-center text-white font-black text-base" style="left:6%;top:2.5%;width:56.7%;height:6.3%;text-shadow:0 2px 3px rgba(60,25,5,.6)"><span>食物 <span id="count-food" class="text-amber-200">0</span>/3 &nbsp;|&nbsp; 飲料 <span id="count-drink" class="text-sky-200">0</span>/1</span></div>
         <button onclick="showScreen('screen-home')" class="absolute clay-btn clay-btn-orange text-sm" style="left:68%;top:2.7%;width:10.5%;aspect-ratio:1">◀</button>
         <button onclick="clearPlate()" class="absolute clay-btn clay-btn-blue text-base" style="left:85%;top:2.7%;width:11%;aspect-ratio:1" title="清空餐盤">🗑️</button>
+        <div id="meal-status-bar" class="absolute flex items-center justify-between px-2.5 py-1 rounded-2xl" style="left:4%;top:10%;width:92%;background:rgba(255,253,247,0.92);border:2px solid #e6d5b8;box-shadow:0 3px 6px rgba(120,80,40,0.14)">
+            <div class="flex items-center gap-1.5 min-w-0">
+                <span id="meal-buff-text" class="text-[11px] font-black text-amber-800 whitespace-nowrap"></span>
+                <button onclick="rerollBuff()" class="clay-btn clay-btn-orange px-2 py-0.5 text-[10px]" style="box-shadow:0 2px 0 #b85d00">🎲 換</button>
+            </div>
+            <div class="flex items-center gap-1.5 text-[10px] font-black text-stone-700 whitespace-nowrap">
+                <span>🪵<b id="meal-stat-f" class="text-amber-600">0</b></span>
+                <span>💧<b id="meal-stat-w" class="text-sky-600">0</b></span>
+                <span>🌶️<b id="meal-stat-i" class="text-rose-600">0</b></span>
+            </div>
+        </div>
         <div id="slot-food-0" onclick="removeFood(0)" class="mslot" style="left:8%;top:21%;width:23%;height:8%"></div>
         <div id="slot-food-1" onclick="removeFood(1)" class="mslot" style="left:36%;top:21%;width:24%;height:8%"></div>
         <div id="slot-food-2" onclick="removeFood(2)" class="mslot" style="left:20%;top:29.3%;width:36%;height:7%"></div>
@@ -508,6 +521,7 @@ img,svg,canvas{display:block;max-width:100%}
         <div id="toilet-shout" class="absolute flex items-center justify-center text-center" style="left:8%;top:2.5%;width:84%;height:11%;background:#fff3de;border:4px solid #b07a52;border-radius:30px;color:#7a3f1d;box-shadow:0 5px 0 #8a5a3a"><span class="text-3xl font-black tracking-wider">嗯嗯嗯—！</span></div>
         <p class="absolute w-full text-center text-xs font-black text-white" style="top:14.5%;text-shadow:0 1px 3px rgba(0,0,0,.7)">長按下方按鈕蓄力，指針停在<span class="text-yellow-300">發光黃金區</span>放開！</p>
         <div id="toilet-bowl" class="absolute" style="left:8%;top:20%;width:84%;height:33%"></div>
+        <div id="toilet-warn" class="hidden absolute left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[11px] font-black text-white bg-red-600 border-2 border-white shadow-md whitespace-nowrap" style="top:49.5%"></div>
         <div class="absolute" style="left:7%;top:54.5%;width:86%;height:9%;background:linear-gradient(#efe6d8,#d9cbb6);border-radius:999px;border:3px solid #fff;box-shadow:0 3px 8px rgba(0,0,0,.25)">
             <div class="absolute" style="left:2.5%;right:2.5%;top:18%;bottom:18%">
                 <div class="h-full w-full rounded-full overflow-hidden relative" style="background:linear-gradient(90deg,#ef4444 0%,#f59e0b 25%,#facc15 40%,#84cc16 55%,#22c55e 75%,#3b82f6 100%)">
@@ -560,8 +574,31 @@ img,svg,canvas{display:block;max-width:100%}
                 <!-- 由 JS 動態生成 -->
             </div>
 
-            <div class="text-center text-[11px] font-bold text-stone-400 pt-1">
+            <div id="dex-footer-tip" class="text-center text-[11px] font-bold text-stone-400 pt-1">
                 集滿 12 種傳奇造型，解鎖黃金聖衣！
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================
+         彈出視窗：戰績截圖分享 (Screenshot Share Modal)
+         ================================================================= -->
+    <div id="modal-share" class="hidden absolute inset-0 z-40 bg-stone-900/70 backdrop-blur-xs flex flex-col p-4">
+        <div class="clay-card flex-1 flex flex-col overflow-hidden p-4 bg-[#FFFDF7]">
+            <div class="flex items-center justify-between border-b-2 border-stone-200 pb-2.5">
+                <div>
+                    <h3 class="text-lg font-black text-stone-800">📸 戰績鑑定截圖</h3>
+                    <p class="text-[11px] font-bold text-amber-700">手機可長按圖片儲存，或直接分享給好友！</p>
+                </div>
+                <button onclick="closeShareModal()" class="clay-btn clay-btn-red w-9 h-9 text-base">✕</button>
+            </div>
+            <div class="flex-1 flex items-center justify-center overflow-hidden py-2.5">
+                <img id="share-preview-img" src="" alt="便便煉金術戰績截圖" class="h-full object-contain rounded-2xl shadow-lg border-2 border-stone-200" style="max-height:100%;user-select:auto;-webkit-user-select:auto;-webkit-touch-callout:default;">
+            </div>
+            <div class="flex gap-2 pt-1">
+                <button id="btn-share-native" onclick="triggerNativeShare()" class="hidden clay-btn clay-btn-green flex-1 py-2.5 text-sm">📤 系統分享</button>
+                <button onclick="downloadShareImage()" class="clay-btn clay-btn-orange flex-1 py-2.5 text-sm">💾 下載圖片</button>
+                <button onclick="copyShareText()" class="clay-btn clay-btn-blue px-3 py-2.5 text-xs">📋 複製文字</button>
             </div>
         </div>
     </div>
@@ -835,11 +872,18 @@ let gameState = {
  */
 let audioCtx = null;
 function initAudio() {
-    if (!audioCtx) {
-        const AC = window.AudioContext || window.webkitAudioContext;
-        if (AC) audioCtx = new AC();
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    if (!audioCtx || audioCtx.state === 'closed') {
+        audioCtx = new AC();
     }
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    if (audioCtx.state !== 'running') {
+        try {
+            const p = audioCtx.resume();
+            if (p && typeof p.catch === 'function') p.catch(() => {});
+        } catch (e) {}
+    }
+    return audioCtx;
 }
 function beep(freq, start, dur, vol = 0.18, type = 'triangle', endFreq = null) {
     const o = audioCtx.createOscillator(), g = audioCtx.createGain();
@@ -852,17 +896,25 @@ function beep(freq, start, dur, vol = 0.18, type = 'triangle', endFreq = null) {
     o.connect(g); g.connect(audioCtx.destination);
     o.start(start); o.stop(start + dur + 0.02);
 }
-function playSound(type) {
+function playSound(type, val = 0) {
     if (!gameState.soundEnabled) return;
     try {
         initAudio();
         if (!audioCtx) return;
-        const now = audioCtx.currentTime;
-        if (type === 'pop') { beep(523, now, 0.09); beep(784, now + 0.04, 0.1); }
-        else if (type === 'remove') { beep(330, now, 0.1); }
-        else if (type === 'boing') { beep(130, now, 0.35, 0.25, 'sine', 520); beep(520, now + 0.18, 0.2, 0.2, 'sine', 240); }
-        else if (type === 'win') { [523, 659, 784, 988].forEach((f, i) => beep(f, now + i * 0.07, 0.35, 0.16)); }
-        else if (type === 'tick') { beep(900, now, 0.04, 0.08, 'square'); }
+        const trigger = () => {
+            const now = audioCtx.currentTime;
+            if (type === 'pop') { beep(523, now, 0.09); beep(784, now + 0.04, 0.1); }
+            else if (type === 'remove') { beep(330, now, 0.1); }
+            else if (type === 'boing') { beep(130, now, 0.35, 0.25, 'sine', 520); beep(520, now + 0.18, 0.2, 0.2, 'sine', 240); }
+            else if (type === 'win') { [523, 659, 784, 988].forEach((f, i) => beep(f, now + i * 0.07, 0.35, 0.16)); }
+            else if (type === 'tick') { beep(900, now, 0.04, 0.08, 'square'); }
+            else if (type === 'strain') { beep(150 + val * 3.5, now, 0.07, 0.09, 'sawtooth'); }
+        };
+        if (audioCtx.state !== 'running') {
+            audioCtx.resume().then(trigger).catch(() => {});
+        } else {
+            trigger();
+        }
     } catch (e) { /* 忽略音訊權限錯誤 */ }
 }
 
@@ -878,7 +930,7 @@ function toggleSound() {
  * main：輕快木琴 (首頁/選餐/結算)　digest：咕嚕冒泡 (消化)　toilet：緊張節奏 (蓄力)
  */
 const BGM = (() => {
-    let timer = null, step = 0, nextT = 0, mode = 'main', master = null, noise = null, userGo = false;
+    let timer = null, step = 0, nextT = 0, mode = 'main', master = null, noise = null, userGo = false, boundCtx = null;
     const BPM = { main: 112, digest: 88, toilet: 136 };
     const mtof = n => 440 * Math.pow(2, (n - 69) / 12);
     const CH = [[48,52,55],[45,48,52],[41,45,48],[43,47,50]]; // C Am F G
@@ -954,10 +1006,36 @@ const BGM = (() => {
         }
     }
     function tick() {
-        if (!audioCtx) return;
+        if (!audioCtx || audioCtx.state !== 'running') return;
         const spb = 60 / BPM[mode] / 4;
-        if (nextT < audioCtx.currentTime - 0.5) nextT = audioCtx.currentTime + 0.05;
+        if (nextT < audioCtx.currentTime - 0.5 || nextT > audioCtx.currentTime + 1.0) {
+            nextT = audioCtx.currentTime + 0.05;
+        }
         while (nextT < audioCtx.currentTime + 0.15) { playStep(step, nextT); nextT += spb; step++; }
+    }
+    function ensureNodes() {
+        if (!audioCtx) return;
+        if (boundCtx !== audioCtx || !master) {
+            boundCtx = audioCtx;
+            master = audioCtx.createGain();
+            master.gain.value = 0;
+            master.connect(audioCtx.destination);
+            noise = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate * 0.1), audioCtx.sampleRate);
+            const d = noise.getChannelData(0);
+            for (let k = 0; k < d.length; k++) d[k] = Math.random() * 2 - 1;
+            audioCtx.onstatechange = () => {
+                if (audioCtx && audioCtx.state === 'running' && userGo && gameState.soundEnabled && !document.hidden) {
+                    applyPlayState();
+                }
+            };
+        }
+    }
+    function applyPlayState() {
+        if (!audioCtx || !master || document.hidden || !gameState.soundEnabled) return;
+        master.gain.cancelScheduledValues(audioCtx.currentTime);
+        master.gain.setTargetAtTime(0.5, audioCtx.currentTime, 0.15);
+        nextT = audioCtx.currentTime + 0.06;
+        if (!timer) { step = 0; timer = setInterval(tick, 30); }
     }
     function start() {
         userGo = true;
@@ -965,40 +1043,50 @@ const BGM = (() => {
         try {
             initAudio();
             if (!audioCtx) return;
-            if (!master) {
-                master = audioCtx.createGain(); master.gain.value = 0; master.connect(audioCtx.destination);
-                noise = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate * 0.1), audioCtx.sampleRate);
-                const d = noise.getChannelData(0);
-                for (let k = 0; k < d.length; k++) d[k] = Math.random() * 2 - 1;
+            ensureNodes();
+            if (audioCtx.state !== 'running') {
+                audioCtx.resume().then(() => {
+                    if (userGo && gameState.soundEnabled && !document.hidden) applyPlayState();
+                }).catch(() => {});
+            } else {
+                applyPlayState();
             }
-            master.gain.cancelScheduledValues(audioCtx.currentTime);
-            master.gain.setTargetAtTime(0.5, audioCtx.currentTime, 0.3);
-            if (!timer) { step = 0; nextT = audioCtx.currentTime + 0.08; timer = setInterval(tick, 30); }
         } catch (e) { /* 忽略音訊權限錯誤 */ }
     }
     function stop() {
         if (timer) { clearInterval(timer); timer = null; }
-        if (master && audioCtx) master.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
+        if (master && audioCtx && audioCtx.state === 'running') {
+            master.gain.cancelScheduledValues(audioCtx.currentTime);
+            master.gain.setTargetAtTime(0, audioCtx.currentTime, 0.08);
+        }
     }
     function setMode(m) {
         if (m === mode) return;
         mode = m; step = 0;
         if (audioCtx) nextT = audioCtx.currentTime + 0.06;
     }
-    // 瀏覽器規定要先有使用者操作才能出聲：第一次點擊畫面就開始播放
-    document.addEventListener('pointerdown', () => { if (gameState.soundEnabled) start(); }, true);
+    // 瀏覽器規定要先有使用者操作才能出聲；手機從廣告/背景回來時也透過觸控與視窗事件自動喚醒
+    const wakeAudio = () => {
+        if (!gameState.soundEnabled) return;
+        if (!userGo || (audioCtx && audioCtx.state !== 'running')) start();
+    };
+    ['pointerdown', 'touchend', 'click'].forEach(ev => {
+        document.addEventListener(ev, wakeAudio, true);
+    });
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) stop(); else if (userGo && gameState.soundEnabled) start();
     });
+    window.addEventListener('pageshow', () => { if (userGo && gameState.soundEnabled && !document.hidden) start(); });
+    window.addEventListener('focus', () => { if (userGo && gameState.soundEnabled && !document.hidden) start(); });
     return { start, stop, setMode };
 })();
 
 /**
  * 廣告連結：玩家按「再吃一頓」時，每 AD_EVERY 次開一次廣告 (新分頁，遊戲不中斷)
- * AD_EVERY = 1 代表每次都開；建議 3 以上，避免玩家反感
+ * AD_EVERY = 1 代表每次點擊都會開啟廣告
  */
 const AD_URL = 'https://uplcm.com/4/12128613';
-const AD_EVERY = 3;
+const AD_EVERY = 1;
 function retryMeal() {
     let n = 0;
     try { n = parseInt(localStorage.getItem('poop_retry_count') || '0', 10) + 1; localStorage.setItem('poop_retry_count', String(n)); } catch (e) { n++; }
@@ -1006,6 +1094,7 @@ function retryMeal() {
         try { window.open(AD_URL, '_blank', 'noopener'); } catch (e) {}
         showToast('🙏 感謝支持！贊助連結已在新分頁開啟');
     }
+    rollDailyBuff(true);
     goToMealScreen();
 }
 
@@ -1092,15 +1181,37 @@ function showScreen(screenId) {
     if (typeof BGM !== 'undefined') BGM.setMode({ 'screen-digest': 'digest', 'screen-toilet': 'toilet' }[screenId] || 'main');
 }
 
+function hasGoldenSuit() {
+    return gameState.unlockedIds.length >= POOP_DEX.length;
+}
+
+function updateBuffUI() {
+    const b = gameState.currentBuff;
+    document.getElementById('buff-icon').textContent = b.icon;
+    document.getElementById('buff-title').textContent = b.title;
+    document.getElementById('buff-desc').textContent = b.desc;
+    const mealBuff = document.getElementById('meal-buff-text');
+    if (mealBuff) mealBuff.textContent = `${b.icon} ${b.title}`;
+}
+
+function rollDailyBuff(excludeCurrent = false) {
+    let pool = DAILY_BUFFS;
+    if (excludeCurrent && DAILY_BUFFS.length > 1) {
+        pool = DAILY_BUFFS.filter(b => b.id !== gameState.currentBuff?.id);
+    }
+    gameState.currentBuff = pool[Math.floor(Math.random() * pool.length)];
+    updateBuffUI();
+}
+
+function rerollBuff() {
+    playSound('pop');
+    rollDailyBuff(true);
+    renderPlate();
+    showToast(`🎲 已切換體質：${gameState.currentBuff.icon} ${gameState.currentBuff.title}`);
+}
+
 function initHome() {
-    // 隨機抽取今日腸胃狀態卡
-    const randIdx = Math.floor(Math.random() * DAILY_BUFFS.length);
-    gameState.currentBuff = DAILY_BUFFS[randIdx];
-
-    document.getElementById('buff-icon').textContent = gameState.currentBuff.icon;
-    document.getElementById('buff-title').textContent = gameState.currentBuff.title;
-    document.getElementById('buff-desc').textContent = gameState.currentBuff.desc;
-
+    rollDailyBuff(false);
     updateMetaCounters();
 
     // 渲染首頁馬桶上的經典微笑便便
@@ -1114,6 +1225,17 @@ function updateMetaCounters() {
     document.getElementById('home-max-score').textContent = gameState.maxScore;
     document.getElementById('home-dex-count').textContent = `${gameState.unlockedIds.length}/${POOP_DEX.length}`;
     document.getElementById('modal-dex-count').textContent = gameState.unlockedIds.length;
+
+    const golden = hasGoldenSuit();
+    const app = document.getElementById('app-container');
+    if (app) app.classList.toggle('golden-suit-active', golden);
+    const homeBadge = document.getElementById('home-golden-badge');
+    if (homeBadge) homeBadge.classList.toggle('hidden', !golden);
+    const dexTip = document.getElementById('dex-footer-tip');
+    if (dexTip) {
+        dexTip.textContent = golden ? '👑 黃金聖衣已覺醒！全配方結算 +5 分！' : '集滿 12 種傳奇造型，解鎖黃金聖衣！';
+        dexTip.className = golden ? 'text-center text-[11px] font-black text-amber-600 pt-1' : 'text-center text-[11px] font-bold text-stone-400 pt-1';
+    }
 }
 
 /**
@@ -1303,6 +1425,19 @@ function renderPlate() {
         btnEat.style.opacity = '0.5';
         btnEatLabel.textContent = '請先選擇食物或飲料';
     }
+
+    // 即時預覽腸胃狀態數值 (纖維/水分/刺激)
+    const st = calculateMealStats();
+    const sf = document.getElementById('meal-stat-f');
+    const sw = document.getElementById('meal-stat-w');
+    const si = document.getElementById('meal-stat-i');
+    if (sf && sw && si) {
+        sf.textContent = st.F;
+        sw.textContent = st.W;
+        si.textContent = st.I;
+        sw.className = st.W <= 0 ? 'text-red-600' : 'text-sky-600';
+        si.className = st.I >= 7 ? 'text-red-600' : 'text-rose-600';
+    }
 }
 
 /**
@@ -1353,6 +1488,19 @@ function setupToiletMinigame() {
     sweetEl.style.left = `${gameState.sweetStart}%`;
     sweetEl.style.width = `${gameState.sweetWidth}%`;
 
+    const warnEl = document.getElementById('toilet-warn');
+    if (warnEl) {
+        const warns = [];
+        if (stats.I >= 7) warns.push('🌶️ 腸胃暴走！指針加速！');
+        if (stats.W <= 0) warns.push('🏜️ 缺水卡關！黃金區變窄！');
+        if (warns.length) {
+            warnEl.textContent = warns.join(' ');
+            warnEl.classList.remove('hidden');
+        } else {
+            warnEl.classList.add('hidden');
+        }
+    }
+
     document.getElementById('gauge-needle').style.left = '0%';
     document.getElementById('toilet-shout').innerHTML = `<span class="text-2xl font-black text-stone-800">長按按鈕蓄力！</span>`;
     document.getElementById('toilet-bowl').classList.remove('animate-shake');
@@ -1363,11 +1511,14 @@ function startPush(e) {
     if (gameState.isPushing) return;
     gameState.isPushing = true;
 
-    document.getElementById('toilet-shout').innerHTML = `<span class="text-3xl font-black text-red-600">嗯嗯嗯——！！💢</span>`;
+    const shoutEl = document.getElementById('toilet-shout');
+    shoutEl.innerHTML = `<span class="text-3xl font-black text-red-600">嗯嗯嗯——！！💢</span>`;
     document.getElementById('toilet-bowl').classList.add('animate-shake');
 
     if (navigator.vibrate) navigator.vibrate([40, 30, 40, 30, 60]);
 
+    let frameCount = 0;
+    let inSweetNow = false;
     function tick() {
         if (!gameState.isPushing) return;
         gameState.needlePos += gameState.needleDir * gameState.needleSpeed;
@@ -1379,6 +1530,15 @@ function startPush(e) {
             gameState.needleDir = 1;
         }
         document.getElementById('gauge-needle').style.left = `${gameState.needlePos}%`;
+        const inSweet = gameState.needlePos >= gameState.sweetStart && gameState.needlePos <= gameState.sweetStart + gameState.sweetWidth;
+        if (inSweet !== inSweetNow) {
+            inSweetNow = inSweet;
+            shoutEl.innerHTML = inSweet
+                ? `<span class="text-3xl font-black text-amber-600">快出來了——！！🔥</span>`
+                : `<span class="text-3xl font-black text-red-600">嗯嗯嗯——！！💢</span>`;
+        }
+        if (frameCount % 6 === 0) playSound('strain', gameState.needlePos);
+        frameCount++;
         gameState.animFrameId = requestAnimationFrame(tick);
     }
     gameState.animFrameId = requestAnimationFrame(tick);
@@ -1391,7 +1551,7 @@ function releasePush(e) {
     cancelAnimationFrame(gameState.animFrameId);
     document.getElementById('toilet-bowl').classList.remove('animate-shake');
 
-    // 計算蓄力精準度加成 (-10 ~ +12 分)
+    // 計算蓄力精準度加成 (-8 ~ +12 分)
     const p = gameState.needlePos;
     const s = gameState.sweetStart;
     const ePos = s + gameState.sweetWidth;
@@ -1399,10 +1559,13 @@ function releasePush(e) {
 
     if (p >= s && p <= ePos) {
         pushBonus = 12; // 完美黃金區間！
+        showToast('💥 黃金順暢！蓄力加成 +12 分！');
     } else if (Math.abs(p - (s + gameState.sweetWidth / 2)) <= gameState.sweetWidth + 10) {
         pushBonus = 4;  // 還算順暢
+        showToast('✨ 還算順暢！蓄力加成 +4 分');
     } else {
         pushBonus = -8; // 卡住或暴衝
+        showToast('😖 節奏失誤！卡住扣 8 分');
     }
 
     evaluatePoopResult(pushBonus);
@@ -1481,18 +1644,19 @@ function evaluatePoopResult(pushBonus) {
 
     const goldLeafBonus = ids.includes('S04') ? 6 : 0;
     const buffBonus = (gameState.currentBuff.id === 'B2' && I >= 5) ? 8 : 0;
+    const goldenSuitBonus = hasGoldenSuit() ? 5 : 0;
     let finalScore;
     if (matchedPoop) {
-        finalScore = Math.max(0, Math.min(100, baseScore + pushBonus + goldLeafBonus + buffBonus));
+        finalScore = Math.max(0, Math.min(100, baseScore + pushBonus + goldLeafBonus + buffBonus + goldenSuitBonus));
     } else {
         // ===== 一般動態評分：45 + 纖維適配 + 水分適配 + 健康 - 刺激超標 + 蓄力 =====
         const dist = (v, lo, hi) => v < lo ? lo - v : (v > hi ? v - hi : 0);
         const fiberFit = Math.max(-15, 15 - dist(F, 6, 12) * 4);
         const waterFit = Math.max(-15, 15 - dist(W, 5, 10) * 4);
         const irritation = Math.max(0, I - 6) * 3;
-        const total = 45 + fiberFit + waterFit + health - irritation + pushBonus + buffBonus;
-        if (total >= 56) { matchedPoop = POOP_DEX.find(p => p.id === 'P09'); finalScore = Math.min(88, Math.round(total)); }
-        else { matchedPoop = POOP_DEX.find(p => p.id === 'P10'); finalScore = Math.max(0, Math.min(55, Math.round(total))); }
+        const total = 45 + fiberFit + waterFit + health - irritation + pushBonus + buffBonus + goldenSuitBonus;
+        if (total >= 56) { matchedPoop = POOP_DEX.find(p => p.id === 'P09'); finalScore = Math.min(88 + goldenSuitBonus, Math.round(total)); }
+        else { matchedPoop = POOP_DEX.find(p => p.id === 'P10'); finalScore = Math.max(0, Math.min(55 + goldenSuitBonus, Math.round(total))); }
     }
     renderResultScreen(matchedPoop, finalScore, { F, W, O, I });
 }
@@ -1514,10 +1678,18 @@ function resultFinal() {
 }
 
 function renderResultScreen(poop, score, stats) {
+    const wasGolden = hasGoldenSuit();
     const isNew = !gameState.unlockedIds.includes(poop.id);
     if (isNew) {
         gameState.unlockedIds.push(poop.id);
         localStorage.setItem('poop_unlocked_ids', JSON.stringify(gameState.unlockedIds));
+    }
+    const justUnlockedGolden = !wasGolden && hasGoldenSuit();
+    if (justUnlockedGolden) {
+        setTimeout(() => {
+            playSound('win');
+            showToast('👑 恭喜集滿 12 種圖鑑！黃金聖衣已覺醒（全配方 +5 分）！');
+        }, 3600);
     }
     if (score > gameState.maxScore) {
         gameState.maxScore = score;
@@ -1621,23 +1793,392 @@ document.getElementById('screen-result').addEventListener('click', e => {
  * 11. 社群分享與圖鑑博物館視窗
  * ============================================================================
  */
-function shareResult() {
-    if (!gameState.lastResult) return;
+let _shareBlob = null;
+let _shareDataUrl = '';
+
+function loadCanvasImg(src) {
+    return new Promise(resolve => {
+        if (!src) return resolve(null);
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = src;
+    });
+}
+
+function drawRoundedRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+}
+
+function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 4) {
+    const chars = Array.from(String(text || ''));
+    let line = '';
+    let row = 0;
+    for (let i = 0; i < chars.length; i++) {
+        const test = line + chars[i];
+        if (ctx.measureText(test).width > maxWidth && line.length > 0) {
+            if (row >= maxLines - 1) {
+                ctx.fillText(line.slice(0, -1) + '…', x, y + row * lineHeight);
+                return;
+            }
+            ctx.fillText(line, x, y + row * lineHeight);
+            line = chars[i];
+            row++;
+        } else {
+            line = test;
+        }
+    }
+    if (line) ctx.fillText(line, x, y + row * lineHeight);
+}
+
+async function generateResultPoster() {
+    const { poop, score, rank, isNew, pcts } = gameState.lastResult;
+    const foods = [...gameState.selectedFoods, gameState.selectedDrink].filter(Boolean);
+    const W = 720, H = 1280;
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    const fontFamily = "'Fredoka', 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans TC', sans-serif";
+
+    // 1. 背景漸層與磁磚格線
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+    bgGrad.addColorStop(0, '#FFFDF7');
+    bgGrad.addColorStop(1, '#F3E7D3');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = 'rgba(215, 198, 179, 0.35)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = 0; y <= H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+    // 2. 鑑定證書主卡片
+    ctx.save();
+    ctx.shadowColor = 'rgba(92, 68, 46, 0.22)';
+    ctx.shadowBlur = 24;
+    ctx.shadowOffsetY = 10;
+    ctx.fillStyle = '#FFFFFF';
+    drawRoundedRect(ctx, 32, 32, W - 64, H - 64, 34);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.strokeStyle = '#DFCDAE';
+    ctx.lineWidth = 4;
+    drawRoundedRect(ctx, 32, 32, W - 64, H - 64, 34);
+    ctx.stroke();
+
+    // 3. 頂部標題與今日狀態
+    ctx.fillStyle = '#6B4E3D';
+    drawRoundedRect(ctx, 130, 56, W - 260, 44, 22);
+    ctx.fill();
+    ctx.fillStyle = '#FFFDF7';
+    ctx.font = `900 22px ${fontFamily}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('💩 便便煉金術 · 鑑定報告', W / 2, 79);
+
+    ctx.fillStyle = '#8A6A3A';
+    ctx.font = `700 18px ${fontFamily}`;
+    ctx.fillText(`今日體質：${gameState.currentBuff.icon} ${gameState.currentBuff.title}`, W / 2, 122);
+
+    // 4. 便便展示舞台 (格子背景)
+    const sx = 180, sy = 148, sw = 360, sh = 290;
+    ctx.save();
+    drawRoundedRect(ctx, sx, sy, sw, sh, 28);
+    ctx.clip();
+    const cell = 28;
+    for (let gx = sx; gx < sx + sw; gx += cell) {
+        for (let gy = sy; gy < sy + sh; gy += cell) {
+            const odd = (Math.floor((gx - sx) / cell) + Math.floor((gy - sy) / cell)) % 2 === 1;
+            ctx.fillStyle = odd ? '#DBE8FF' : '#FFFFFF';
+            ctx.fillRect(gx, gy, cell, cell);
+        }
+    }
+    ctx.restore();
+    ctx.strokeStyle = '#B9CDF0';
+    ctx.lineWidth = 4;
+    drawRoundedRect(ctx, sx, sy, sw, sh, 28);
+    ctx.stroke();
+
+    // 載入並繪製便便圖片
+    const poopImg = await loadCanvasImg(poop.img);
+    if (poopImg) {
+        const pad = 18;
+        const maxW = sw - pad * 2, maxH = sh - pad * 2;
+        const scale = Math.min(maxW / poopImg.width, maxH / poopImg.height);
+        const dw = poopImg.width * scale, dh = poopImg.height * scale;
+        ctx.save();
+        ctx.shadowColor = 'rgba(90, 60, 30, 0.28)';
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetY = 6;
+        ctx.drawImage(poopImg, sx + (sw - dw) / 2, sy + (sh - dh) / 2, dw, dh);
+        ctx.restore();
+    } else {
+        ctx.fillStyle = poop.color || '#78350F';
+        ctx.beginPath();
+        ctx.arc(W / 2, sy + sh / 2, 75, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // NEW! 標籤
+    if (isNew) {
+        ctx.save();
+        ctx.translate(sx + sw - 26, sy + 24);
+        ctx.rotate(0.21);
+        ctx.fillStyle = '#DC2626';
+        drawRoundedRect(ctx, -46, -22, 92, 44, 12);
+        ctx.fill();
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = `900 22px ${fontFamily}`;
+        ctx.fillText('NEW!', 0, 2);
+        ctx.restore();
+    }
+
+    // 5. 隱藏技緞帶與便便名稱
+    const bannerText = poop.comboName ? `★ 觸發隱藏技：${poop.comboName} ★` : '★ 官方腸道煉金鑑定書 ★';
+    ctx.fillStyle = '#FEF3C7';
+    drawRoundedRect(ctx, 110, 458, W - 220, 42, 21);
+    ctx.fill();
+    ctx.strokeStyle = '#F59E0B';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+    ctx.fillStyle = '#B45309';
+    ctx.font = `900 20px ${fontFamily}`;
+    ctx.fillText(bannerText, W / 2, 480);
+
+    ctx.fillStyle = '#292524';
+    ctx.font = `900 34px ${fontFamily}`;
+    ctx.fillText(poop.name, W / 2, 536);
+
+    // 6. 分數與等級紅章
+    ctx.save();
+    ctx.font = `900 84px ${fontFamily}`;
+    ctx.textAlign = 'right';
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = '#5C3A21';
+    ctx.strokeText(String(score), W / 2 + 12, 622);
+    ctx.fillStyle = '#FFC93C';
+    ctx.fillText(String(score), W / 2 + 12, 622);
+    ctx.restore();
+
+    ctx.fillStyle = '#78716C';
+    ctx.font = `900 26px ${fontFamily}`;
+    ctx.textAlign = 'left';
+    ctx.fillText('分', W / 2 + 20, 636);
+
+    // 等級圓章
+    ctx.save();
+    ctx.translate(W / 2 + 115, 616);
+    ctx.rotate(0.11);
+    ctx.fillStyle = '#DC2626';
+    ctx.beginPath();
+    ctx.arc(0, 0, 42, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#B91C1C';
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    ctx.strokeStyle = '#FCA5A5';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, 35, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `900 44px ${fontFamily}`;
+    ctx.textAlign = 'center';
+    ctx.fillText(rank, 0, 3);
+    ctx.restore();
+
+    // 7. 煉金食材配方列
+    ctx.fillStyle = '#FAF5EC';
+    drawRoundedRect(ctx, 64, 682, W - 128, 122, 20);
+    ctx.fill();
+    ctx.strokeStyle = '#EADBC2';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#78716C';
+    ctx.font = `900 17px ${fontFamily}`;
+    ctx.textAlign = 'center';
+    ctx.fillText('🍽️ 本次煉金配方', W / 2, 704);
+
+    const foodImgs = await Promise.all(foods.map(f => loadCanvasImg(FOOD_IMG[f.id])));
+    const slotW = (W - 160) / Math.max(1, foods.length);
+    foods.forEach((f, idx) => {
+        const cx = 80 + slotW * idx + slotW / 2;
+        const fi = foodImgs[idx];
+        if (fi) {
+            ctx.drawImage(fi, cx - 26, 718, 52, 52);
+        } else {
+            ctx.font = `32px ${fontFamily}`;
+            ctx.fillText(f.icon || '🍽️', cx, 744);
+        }
+        ctx.fillStyle = '#4A3320';
+        ctx.font = `900 16px ${fontFamily}`;
+        ctx.fillText(f.name.length > 6 ? f.name.slice(0, 6) + '…' : f.name, cx, 786);
+    });
+
+    // 8. 三項數值條
+    const statLabels = ['🪵 成形度', '💧 含水量', '💨 惡臭指數'];
+    const statColors = ['#FB923C', '#38BDF8', '#34D399'];
+    statLabels.forEach((label, i) => {
+        const y = 842 + i * 48;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#44403C';
+        ctx.font = `900 20px ${fontFamily}`;
+        ctx.fillText(label, 76, y);
+
+        const bx = 250, bw = 385, bh = 22;
+        ctx.fillStyle = '#EFE7DA';
+        drawRoundedRect(ctx, bx, y - bh / 2, bw, bh, 11);
+        ctx.fill();
+
+        const fillW = Math.max(18, (bw * (pcts[i] || 0)) / 100);
+        ctx.fillStyle = statColors[i];
+        drawRoundedRect(ctx, bx, y - bh / 2, fillW, bh, 11);
+        ctx.fill();
+    });
+
+    // 9. 評語框
+    ctx.fillStyle = '#FFF8EB';
+    drawRoundedRect(ctx, 64, 982, W - 128, 122, 20);
+    ctx.fill();
+    ctx.strokeStyle = '#E7D8BE';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#44403C';
+    ctx.font = `700 20px ${fontFamily}`;
+    drawWrappedText(ctx, `💬 ${poop.comment}`, 84, 1016, W - 168, 30, 3);
+
+    // 10. 底部挑戰標語 + QR Code + 遊戲網址
+    const qrSz = 37, qrCell = 2.8, qrBox = Math.ceil(qrSz * qrCell) + 12;
+    const qrX = W - 64 - qrBox, qrY = 1116;
+    ctx.fillStyle = '#FFFFFF';
+    drawRoundedRect(ctx, qrX, qrY, qrBox, qrBox, 10);
+    ctx.fill();
+    ctx.strokeStyle = '#DFCDAE';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = '#1C1917';
+    for (let r = 0; r < qrSz; r++) {
+        for (let c = 0; c < qrSz; c++) {
+            if (GAME_QR_BITS[r * qrSz + c] === '1') {
+                ctx.fillRect(qrX + 6 + c * qrCell, qrY + 6 + r * qrCell, Math.ceil(qrCell), Math.ceil(qrCell));
+            }
+        }
+    }
+
+    ctx.textAlign = 'left';
+    if (hasGoldenSuit()) {
+        ctx.fillStyle = '#D97706';
+        ctx.font = `900 18px ${fontFamily}`;
+        ctx.fillText('👑 黃金聖衣傳奇大師（+5 加成）', 66, 1138);
+    }
+    ctx.fillStyle = '#B45309';
+    ctx.font = `900 21px ${fontFamily}`;
+    ctx.fillText('👇 掃碼挑戰比我更高分的大便！', 66, 1170);
+    ctx.fillStyle = '#78716C';
+    ctx.font = `700 13px ${fontFamily}`;
+    ctx.fillText('便便煉金術 · 3D 黏土腸道大冒險', 66, 1198);
+    ctx.fillStyle = '#A8A29E';
+    ctx.font = `700 11px ${fontFamily}`;
+    ctx.fillText(GAME_URL, 66, 1218);
+
+    return new Promise(resolve => {
+        canvas.toBlob(blob => resolve({ blob, dataUrl: canvas.toDataURL('image/png') }), 'image/png');
+    });
+}
+
+const GAME_URL = 'https://alexchiencsl-cloud.github.io/Poop-Alchemy-Craft-Your-Masterpiece/';
+const GAME_QR_BITS = '1111111001110010011011110010101111111100000100100110111010110101110100000110111010100100101011111110101010111011011101010010001110100100110001011101101110101011110100110101000010101110110000010100100111010010000111010000011111111010101010101010101010101111111000000001000001100010101001100000000010111110011010110010101101100011111000011000001110001110001010110110101010110100110010100000101110011110111011110110001111001101000010000010110000011101111101011110010000001110011011111010110001000100001111001000010010000000100010100001110100110011010011110110001010010010111011011100001000110001011110111001101110000011110011100011001111001001010110110100100011001011100110111101110001110100101101110101011001111011111001100011100001110111000111000010101101111111101011100110111001100000100011100101111010110100001000101001100011010110100110001110111101100101100100001001000011110100111100110101011001001000001100100011011010101101010000000010111000101000000000000010110110010100000100101001010111000111010110101001100100111111011111010011101110100101010000010010111111111110000000000101111101101110101011000110011111111000000001110000000010101010111100000101010011011101110001010001101110111010100100001000001101111111101101011101011110001001100010101011010101101110101110100110101100001111000001110000010001011110010111010001110100011111111011100001010010101100000010111';
+
+function getShareText() {
     const { poop, score, rank } = gameState.lastResult;
     const foodsText = [...gameState.selectedFoods, gameState.selectedDrink]
         .filter(Boolean)
         .map(i => i.name)
         .join(' + ');
+    return `💩【便便煉金術鑑定報告】\n我剛吃了「${foodsText}」，居然煉出了【${poop.name}】！\n🏆 綜合評分：${score} 分（${rank} 級）\n💬 評語：${poop.comment}\n👇 你敢來挑戰比我更高分的大便嗎？\n${GAME_URL}`;
+}
 
-    const shareMsg = `💩【便便煉金術鑑定報告】\n我剛吃了「${foodsText}」，居然煉出了【${poop.name}】！\n🏆 綜合評分：${score} 分（${rank} 級）\n💬 評語：${poop.comment}\n👇 你敢來挑戰比我更高分的大便嗎？`;
-
+function copyShareText() {
+    if (!gameState.lastResult) return;
     const helper = document.getElementById('clipboard-helper');
-    helper.value = shareMsg;
+    helper.value = getShareText();
     helper.select();
     document.execCommand('copy');
-
     playSound('pop');
-    showToast('📋 戰績已複製！快貼到 LINE 群組嗆朋友吧！');
+    showToast('📋 戰績文字已複製！');
+}
+
+function downloadShareImage() {
+    if (!_shareDataUrl) return;
+    const a = document.createElement('a');
+    a.href = _shareDataUrl;
+    a.download = `便便煉金術_${gameState.lastResult?.poop?.name || '鑑定報告'}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    playSound('pop');
+    showToast('💾 截圖已下載！快去分享給朋友吧！');
+}
+
+async function triggerNativeShare() {
+    if (!_shareBlob || !navigator.share) return;
+    const file = new File([_shareBlob], 'poop-alchemy-result.png', { type: 'image/png' });
+    try {
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                files: [file],
+                title: '💩 便便煉金術鑑定報告',
+                text: `我煉出了【${gameState.lastResult.poop.name}】獲得 ${gameState.lastResult.score} 分（${gameState.lastResult.rank} 級）！`
+            });
+            return true;
+        }
+    } catch (e) {
+        if (e && e.name === 'AbortError') return true;
+    }
+    return false;
+}
+
+function closeShareModal() {
+    playSound('remove');
+    document.getElementById('modal-share').classList.add('hidden');
+}
+
+async function shareResult() {
+    if (!gameState.lastResult) return;
+    resultFinal();
+    playSound('pop');
+    showToast('📸 正在產生戰績截圖...');
+
+    const { blob, dataUrl } = await generateResultPoster();
+    _shareBlob = blob;
+    _shareDataUrl = dataUrl;
+
+    document.getElementById('share-preview-img').src = dataUrl;
+    const canNative = Boolean(blob && navigator.canShare && navigator.canShare({
+        files: [new File([blob], 'poop-alchemy-result.png', { type: 'image/png' })]
+    }));
+    document.getElementById('btn-share-native').classList.toggle('hidden', !canNative);
+
+    // 優先呼叫手機原生圖片分享；若不支援或未完成則顯示預覽視窗供長按儲存／下載
+    if (canNative) {
+        const ok = await triggerNativeShare();
+        if (ok) return;
+    }
+    document.getElementById('modal-share').classList.remove('hidden');
 }
 
 const DEX_HINTS = {"P01": ["金黃色的甜蜜組合，吃一堆金燦燦的食物", ["F01", "V02"], ["F01", "V02", "S06"], "玉米粒罐頭可換成濃郁玉米濃湯或維他命B群"], "P02": ["滿滿的綠色，抹茶加上綠色蔬果", ["D05", "V03"], ["D05", "V03", "V09", "V12"], "墨綠色蔬果任選 2 樣（含苦瓜鹹蛋）"], "P03": ["黑色食材再加一點奢華的閃亮配料", ["S04", "F03"], ["S04", "F03", "F04", "S14"], "焦黑色食材任選 2 樣"], "P04": ["顏色越多越繽紛，湊齊 4 種不同的顏色", ["V01", "S05"], ["V01", "S05", "S06", "D06"], "重點是 4 種不同顏色，不一定要這幾樣"], "P05": ["台灣手搖飲的靈魂搭檔，加一點顆粒口感", ["D03", "V05"], ["D03", "V05", "F09"], "金針菇可換奇亞籽凍或芋頭西米露，再配一樣高纖主食"], "P06": ["紅紫色系的食材是關鍵", ["V01", "F08"], ["V01", "F08", "V08", "S10"], "紅紫色食材任選 3 樣"], "P07": ["早餐店的經典組合，吃完衝向廁所", ["D01", "S02"], ["D01", "S02", "F07"], "大冰奶可換黑棗汁或玫瑰四物飲，優格可換益生菌，主食要是麵"], "P08": ["氣味強烈的食材混搭，蒼蠅都會繞道", ["V07", "F06"], ["F06", "V07", "V17", "V15", "S17"], "大蒜、韭菜盒子、榴槤、蒜泥白肉任選 2 樣，再加麻辣鴨血豆腐"], "P11": ["重口味又超級刺激的辛辣地獄", ["S12", "V10"], ["S12", "V10", "D07", "S09"], "總刺激度要破表，辛辣食材任選 2 樣"], "P12": ["極度乾燥又油膩的飲食，水分嚴重不足", ["F13", "S16"], ["F13", "S16", "V06", "D02"], "水分總和要 ≤ -3"]};
@@ -1658,9 +2199,9 @@ function tapDexHint(id) {
     const h = DEX_HINTS[id]; if (!h) return;
     const lv = dexHintLv[id] || 0;
     if (lv >= 2) return;
-    if (lv === 1 && getPlayCount() < FULL_HINT_NEED) {
-        showToast(`🔒 再玩 ${FULL_HINT_NEED - getPlayCount()} 局，就能看到完整配方！`);
-        return;
+    if (lv === 1) {
+        try { window.open(AD_URL, '_blank', 'noopener'); } catch (e) {}
+        showToast('🎁 已解鎖完整煉金配方！');
     }
     dexHintLv[id] = lv + 1;
     try { localStorage.setItem('poop_hint_lv', JSON.stringify(dexHintLv)); } catch (e) {}
@@ -1691,7 +2232,7 @@ function renderDex() {
             if (h) {
                 let extra = '';
                 if (lv >= 1) extra = dexIngredients(lv >= 2 ? h.full : h.k) + (lv >= 2 ? `<div class="dex-note">${h.note}</div>` : '');
-                const tip = lv === 0 ? '👆 點一下看提示' : lv === 1 ? (getPlayCount() >= FULL_HINT_NEED ? '👆 再點一下看完整配方' : `🔒 再玩 ${FULL_HINT_NEED - getPlayCount()} 局解鎖完整配方`) : '✅ 完整配方';
+                const tip = lv === 0 ? '👆 點一下看提示' : lv === 1 ? '🎁 點擊看廣告，立即解鎖完整配方' : '✅ 完整配方';
                 info.innerHTML = `<div class="text-xs font-black text-stone-400">？？？</div>
                    <div class="text-[10px] font-bold text-stone-500 mt-0.5 leading-tight">${h.t}</div>${extra}
                    <div class="dex-tip">${tip}</div>`;
